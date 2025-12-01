@@ -61,17 +61,17 @@ module.exports = {
   listEvents: async (req, res) => {
     try {
       const { category, location, search } = req.query;
-      
+
       const where = {};
-      
+
       if (category) {
         where.category = category;
       }
-      
+
       if (location) {
         where.locationText = { contains: location };
       }
-      
+
       if (search) {
         where.OR = [
           { title: { contains: search } },
@@ -202,6 +202,106 @@ module.exports = {
     }
   },
 
-  applyToEvent: async (req, res) => res.status(501).json({ message: "Not implemented yet" }),
-  getEventSignups: async (req, res) => res.status(501).json({ message: "Not implemented yet" })
+  applyToEvent: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const volunteerId = req.user.id;
+
+      // Check if user is a volunteer
+      if (req.user.role !== 'VOLUNTEER') {
+        return res.status(403).json({ error: 'Only volunteers can apply to events' });
+      }
+
+      // Get event details
+      const event = await prisma.event.findUnique({
+        where: { id: parseInt(id) }
+      });
+
+      if (!event) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+
+      // Check if event is full
+      if (event.currentVolCount >= event.maxVolunteers) {
+        return res.status(400).json({ error: 'Event is full' });
+      }
+
+      // Check if already applied
+      const existingSignup = await prisma.eventSignup.findFirst({
+        where: {
+          eventId: parseInt(id),
+          volunteerId: volunteerId
+        }
+      });
+
+      if (existingSignup) {
+        return res.status(400).json({ error: 'You have already applied to this event' });
+      }
+
+      // Create signup and increment volunteer count
+      const signup = await prisma.eventSignup.create({
+        data: {
+          eventId: parseInt(id),
+          volunteerId: volunteerId,
+          status: 'REGISTERED'
+        },
+        include: {
+          event: {
+            select: { title: true, date: true }
+          }
+        }
+      });
+
+      // Increment current volunteer count
+      await prisma.event.update({
+        where: { id: parseInt(id) },
+        data: { currentVolCount: { increment: 1 } }
+      });
+
+      res.status(201).json(signup);
+    } catch (error) {
+      console.error('Apply to Event Error:', error);
+      res.status(500).json({ error: 'Failed to apply to event' });
+    }
+  },
+
+  getEventSignups: async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Check if user is the event organiser
+      const event = await prisma.event.findUnique({
+        where: { id: parseInt(id) }
+      });
+
+      if (!event) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+
+      if (event.postedById !== req.user.id) {
+        return res.status(403).json({ error: 'Not authorized to view signups' });
+      }
+
+      const signups = await prisma.eventSignup.findMany({
+        where: { eventId: parseInt(id) },
+        include: {
+          volunteer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              skills: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      res.json(signups);
+    } catch (error) {
+      console.error('Get Event Signups Error:', error);
+      res.status(500).json({ error: 'Failed to fetch signups' });
+    }
+  }
 };
