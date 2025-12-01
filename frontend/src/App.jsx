@@ -7,6 +7,8 @@ import EventsPage from "./pages/EventsPage";
 import EventDetailsPage from "./pages/EventDetailsPage";
 import CreateEventPage from "./pages/CreateEventPage";
 import EditEventPage from "./pages/EditEventPage";
+import VolunteerProfilePage from "./pages/VolunteerProfilePage";
+import MyEventsPage from "./pages/MyEventsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -37,6 +39,22 @@ function App() {
           element={
             <ProtectedRoute role="VOLUNTEER">
               <VolunteerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer/profile"
+          element={
+            <ProtectedRoute role="VOLUNTEER">
+              <VolunteerProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer/my-events"
+          element={
+            <ProtectedRoute role="VOLUNTEER">
+              <MyEventsPage />
             </ProtectedRoute>
           }
         />
