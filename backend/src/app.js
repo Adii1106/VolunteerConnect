@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth.routes');
 const usersRoutes = require('./routes/users.routes');
 const orgRoutes = require('./routes/org.routes');
 const eventsRoutes = require('./routes/events.routes');
+const volunteersRoutes = require('./routes/volunteers.routes');
 const messagesRoutes = require('./routes/messages.routes');
 const communityRoutes = require('./routes/community.routes');
 const authMiddleware = require('./middleware/auth.middleware');
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/org', orgRoutes);
 app.use('/api/events', eventsRoutes);
+app.use('/api/volunteers', volunteersRoutes);
 app.use('/api/messages', authMiddleware, messagesRoutes);
 app.use('/api/community', communityRoutes);
 
