@@ -162,6 +162,12 @@ function EventDetailsPage() {
                         {isOwner && (
                             <>
                                 <Link
+                                    to={`/events/${event.id}/signups`}
+                                    className="px-8 py-3 border-[3px] border-[#111] shadow-[6px_6px_0_#111] font-bold bg-[#2362ef] text-white transition-all hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-[8px_8px_0_#111]"
+                                >
+                                    Manage Volunteers
+                                </Link>
+                                <Link
                                     to={`/events/${event.id}/edit`}
                                     className="px-8 py-3 border-[3px] border-[#111] shadow-[6px_6px_0_#111] font-bold bg-white text-[#111] transition-all hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-[8px_8px_0_#111]"
                                 >
