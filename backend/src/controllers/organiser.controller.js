@@ -121,5 +121,37 @@ module.exports = {
             console.error('Update Signup Status Error:', error);
             res.status(500).json({ error: 'Failed to update status' });
         }
+    },
+
+    // Create organisation profile
+    createProfile: async (req, res) => {
+        try {
+            const { name, description, website, logoUrl } = req.body;
+            const organiserId = req.user.id;
+
+            // Check if profile already exists
+            const existingProfile = await prisma.organisation.findUnique({
+                where: { organiserId }
+            });
+
+            if (existingProfile) {
+                return res.status(400).json({ error: 'Organisation profile already exists' });
+            }
+
+            const organisation = await prisma.organisation.create({
+                data: {
+                    name,
+                    description,
+                    website,
+                    logoUrl,
+                    organiserId
+                }
+            });
+
+            res.status(201).json(organisation);
+        } catch (error) {
+            console.error('Create Profile Error:', error);
+            res.status(500).json({ error: 'Failed to create profile' });
+        }
     }
 };

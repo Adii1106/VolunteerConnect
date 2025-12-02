@@ -14,6 +14,13 @@ function OrganiserDashboard() {
     recentEvents: []
   });
   const [loading, setLoading] = useState(true);
+  const [needsProfile, setNeedsProfile] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: '',
+    description: '',
+    website: '',
+    logoUrl: ''
+  });
 
   useEffect(() => {
     fetchStats();
@@ -24,8 +31,12 @@ function OrganiserDashboard() {
       setLoading(true);
       const data = await organiserService.getDashboardStats();
       setStats(data);
+      setNeedsProfile(false);
     } catch (error) {
       console.error('Failed to fetch stats:', error);
+      if (error.response && error.response.status === 404) {
+        setNeedsProfile(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -35,6 +46,96 @@ function OrganiserDashboard() {
     clearAuth();
     navigate('/');
   };
+
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      await organiserService.createProfile(profileData);
+      setNeedsProfile(false);
+      fetchStats();
+    } catch (error) {
+      console.error('Failed to create profile:', error);
+      alert('Failed to create profile. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#fafafa]">
+        <div className="text-xl font-bold text-[#2362ef]">Loading...</div>
+      </div>
+    );
+  }
+
+  if (needsProfile) {
+    return (
+      <div className="min-h-screen bg-[#fafafa] font-sans text-[#111] flex flex-col items-center justify-center px-4">
+        <div className="bg-white p-8 rounded-lg shadow-[8px_8px_0_#111] border-[3px] border-[#111] max-w-md w-full">
+          <h1 className="text-3xl font-extrabold text-[#222] mb-6 text-center">
+            Setup <span className="text-[#2362ef]">Organisation</span>
+          </h1>
+          <p className="text-[#616161] mb-6 text-center">
+            Please create your organisation profile to continue.
+          </p>
+          <form onSubmit={handleProfileSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold mb-2">Organisation Name</label>
+              <input
+                type="text"
+                required
+                className="w-full px-4 py-2 border-[2px] border-[#111] rounded focus:outline-none focus:border-[#2362ef]"
+                value={profileData.name}
+                onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Description</label>
+              <textarea
+                required
+                className="w-full px-4 py-2 border-[2px] border-[#111] rounded focus:outline-none focus:border-[#2362ef]"
+                rows="3"
+                value={profileData.description}
+                onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Website (Optional)</label>
+              <input
+                type="url"
+                className="w-full px-4 py-2 border-[2px] border-[#111] rounded focus:outline-none focus:border-[#2362ef]"
+                value={profileData.website}
+                onChange={(e) => setProfileData({ ...profileData, website: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Logo URL (Optional)</label>
+              <input
+                type="url"
+                className="w-full px-4 py-2 border-[2px] border-[#111] rounded focus:outline-none focus:border-[#2362ef]"
+                value={profileData.logoUrl}
+                onChange={(e) => setProfileData({ ...profileData, logoUrl: e.target.value })}
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-3 bg-[#2362ef] text-white font-bold rounded border-[3px] border-[#111] shadow-[4px_4px_0_#111] hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-[6px_6px_0_#111] transition-all"
+            >
+              Create Profile
+            </button>
+          </form>
+          <button
+            onClick={handleLogout}
+            className="w-full mt-4 py-2 text-[#616161] font-bold hover:text-[#111]"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#fafafa] font-sans text-[#111]">
@@ -93,9 +194,7 @@ function OrganiserDashboard() {
             </Link>
           </div>
 
-          {loading ? (
-            <p className="text-[#616161]">Loading events...</p>
-          ) : stats.recentEvents.length === 0 ? (
+          {stats.recentEvents.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-[#616161] mb-4">No events created yet.</p>
               <Link
