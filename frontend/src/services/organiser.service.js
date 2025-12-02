@@ -7,6 +7,12 @@ export const organiserService = {
         return response.data;
     },
 
+    // Create organisation profile
+    createProfile: async (profileData) => {
+        const response = await api.post('/organiser/profile', profileData);
+        return response.data;
+    },
+
     // Update signup status
     updateSignupStatus: async (signupId, status) => {
         const response = await api.patch(`/organiser/signups/${signupId}/status`, { status });
