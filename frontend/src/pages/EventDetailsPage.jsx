@@ -8,6 +8,7 @@ function EventDetailsPage() {
     const navigate = useNavigate();
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [hasApplied, setHasApplied] = useState(false);
     const user = getUser();
 
     useEffect(() => {
@@ -19,6 +20,10 @@ function EventDetailsPage() {
             setLoading(true);
             const data = await eventsService.getEvent(id);
             setEvent(data);
+            // Set hasApplied from backend response
+            if (data.hasApplied !== undefined) {
+                setHasApplied(data.hasApplied);
+            }
         } catch (error) {
             console.error('Failed to fetch event:', error);
         } finally {
@@ -29,10 +34,15 @@ function EventDetailsPage() {
     const handleApply = async () => {
         try {
             await eventsService.applyToEvent(id);
+            setHasApplied(true);
             alert('Successfully applied to event!');
             fetchEvent();
         } catch (error) {
-            alert('Failed to apply: ' + (error.response?.data?.error || error.message));
+            if (error.response?.data?.error === 'You have already applied to this event') {
+                setHasApplied(true);
+            } else {
+                alert('Failed to apply: ' + (error.response?.data?.error || error.message));
+            }
         }
     };
 
@@ -154,9 +164,13 @@ function EventDetailsPage() {
                         {!isOrganiser && (
                             <button
                                 onClick={handleApply}
-                                className="px-8 py-3 border-[3px] border-[#111] shadow-[6px_6px_0_#111] font-bold bg-[#2362ef] text-white transition-all hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-[8px_8px_0_#111]"
+                                disabled={hasApplied}
+                                className={`px-8 py-3 border-[3px] border-[#111] shadow-[6px_6px_0_#111] font-bold transition-all ${hasApplied
+                                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                                    : 'bg-[#2362ef] text-white hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-[8px_8px_0_#111]'
+                                    }`}
                             >
-                                Apply to Volunteer
+                                {hasApplied ? '✓ Already Applied' : 'Apply to Volunteer'}
                             </button>
                         )}
                         {isOwner && (

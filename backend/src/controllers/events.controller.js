@@ -100,6 +100,7 @@ module.exports = {
   getEvent: async (req, res) => {
     try {
       const { id } = req.params;
+      console.log('DEBUG: getEvent called with ID:', id);
       const event = await prisma.event.findUnique({
         where: { id: parseInt(id) },
         include: {
@@ -109,12 +110,25 @@ module.exports = {
           }
         }
       });
+      console.log('DEBUG: getEvent result:', event ? 'Found' : 'Not Found');
 
       if (!event) {
         return res.status(404).json({ error: 'Event not found' });
       }
 
-      res.json(event);
+      // Check if the current user has already applied (if authenticated)
+      let hasApplied = false;
+      if (req.user) {
+        const existingSignup = await prisma.eventSignup.findFirst({
+          where: {
+            eventId: parseInt(id),
+            volunteerId: req.user.id
+          }
+        });
+        hasApplied = !!existingSignup;
+      }
+
+      res.json({ ...event, hasApplied });
     } catch (error) {
       console.error('Get Event Error:', error);
       res.status(500).json({ error: 'Failed to fetch event' });
@@ -207,8 +221,11 @@ module.exports = {
       const { id } = req.params;
       const volunteerId = req.user.id;
 
+      console.log('DEBUG applyToEvent: User ID:', req.user.id, 'Role:', req.user.role);
+
       // Check if user is a volunteer
       if (req.user.role !== 'VOLUNTEER') {
+        console.log('DEBUG applyToEvent: User is not a volunteer, role is:', req.user.role);
         return res.status(403).json({ error: 'Only volunteers can apply to events' });
       }
 
