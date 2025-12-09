@@ -4,8 +4,6 @@ import LoginModal from "../components/LoginModal";
 import LoadingScreen from "../components/LoadingScreen";
 import { setAuth, getUser, clearAuth } from "../hooks/auth";
 import { useNavigate, Link } from "react-router-dom";
-import heroBg from "../assets/hero-bg.png";
-import heroSide from "../assets/hero-side.png";
 
 function LandingPage() {
   const [openVolunteer, setOpenVolunteer] = useState(false);
@@ -101,7 +99,7 @@ function LandingPage() {
         {/* Background Image with Overlay */}
         <div
           className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${heroBg})` }}
+          style={{ backgroundImage: `url(/hero-bg.png)` }}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-[#fafafa]/90 to-[#f0f0f0]/95"></div>
         </div>
@@ -135,7 +133,7 @@ function LandingPage() {
 
         <div className="flex-1 flex justify-center lg:justify-end w-full animate-fade-in-right relative z-10">
           <img
-            src={heroSide}
+            src="/hero-side.png"
             alt="Volunteers making a difference"
             className="w-[350px] h-[350px] sm:w-[450px] sm:h-[450px] md:w-[550px] md:h-[550px] lg:w-[600px] lg:h-[600px] object-contain transition-transform hover:scale-110 duration-500 drop-shadow-2xl animate-float"
             style={{ filter: 'drop-shadow(0 25px 50px rgba(35, 98, 239, 0.3))' }}
