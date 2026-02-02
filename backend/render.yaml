@@ -7,9 +7,17 @@ services:
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: volunteerconnect-db
+          property: connectionString
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: PORT
         value: 10000
     autoDeploy: false
+
+databases:
+  - name: volunteerconnect-db
+    databaseName: volunteerconnect
+    user: volunteer_user
+    plan: free # Note: Render free tier databases expire after 30 days
