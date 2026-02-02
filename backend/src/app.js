@@ -18,6 +18,7 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'https://volunteer-ten-theta.vercel.app',
+    'https://volunteer-connect-frontend-orpin.vercel.app', // Added your specific URL
     process.env.FRONTEND_URL
   ].filter(Boolean),
   credentials: true
