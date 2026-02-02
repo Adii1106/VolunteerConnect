@@ -15,7 +15,11 @@ const authMiddleware = require('./middleware/auth.middleware');
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://volunteer-ten-theta.vercel.app'],
+  origin: [
+    'http://localhost:5173',
+    'https://volunteer-ten-theta.vercel.app',
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
   credentials: true
 }));
 app.use(express.json());
