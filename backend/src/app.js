@@ -46,6 +46,28 @@ app.use('/api/organiser', organiserRoutes);
 app.use('/api/messages', authMiddleware, messagesRoutes);
 app.use('/api/community', communityRoutes);
 
+// TEMPORARY: Debug route to run migrations manually
+const { exec } = require('child_process');
+app.get('/api/debug-migrate', (req, res) => {
+  console.log('Starting manual migration...');
+  exec('npx prisma db push', (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Migration Error: ${error.message}`);
+      return res.status(500).json({ 
+        status: 'Error', 
+        error: error.message, 
+        stderr: stderr 
+      });
+    }
+    console.log(`Migration Success: ${stdout}`);
+    res.json({ 
+      status: 'Success', 
+      message: 'Database migrated successfully', 
+      output: stdout 
+    });
+  });
+});
+
 app.get('/', (req, res) => {
   res.send({ status: 'OK', message: 'Volunteer Connect API running' });
 });
