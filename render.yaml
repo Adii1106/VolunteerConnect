@@ -1,6 +1,7 @@
 services:
   - type: web
     name: volunteerconnect-backend
+    rootDir: backend
     env: node
     plan: free
     buildCommand: npm install && npx prisma generate
